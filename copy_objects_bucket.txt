@@ -1,0 +1,14 @@
+import boto3
+
+#s1 = boto3.session.Session(profile_name='default')
+c1 = boto3.resource('s3')
+copy_source = {
+    'Bucket':'bahu-s3',
+    'Key':'folder1/emp1.csv'
+}
+print(c1)
+bucket = c1.Bucket('bhagya-s3')
+print(bucket)
+key = 'folder1/emp1.csv'
+bucket.copy(copy_source, key)
+print('Copy Completed')
