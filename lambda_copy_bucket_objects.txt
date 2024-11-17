@@ -1,0 +1,37 @@
+import json
+import boto3 
+
+def countofobjects():
+    s3_resource = boto3.resource('s3')
+    s3_client = boto3.client('s3')
+    bucket = s3_resource.Bucket('bahu-s3')
+    cnt = 0 
+    for obj in bucket.objects.filter(Prefix='Input/'):
+        cnt = cnt + 1
+    return cnt 
+
+max_count = countofobjects() 
+
+def processing(event):
+    s3_resource = boto3.resource('s3')
+    s3_client = boto3.client('s3')
+    bucket = s3_resource.Bucket('bahu-s3')
+    if event['iter_count'] < max_count:
+        for ob in bucket.objects.filter(Prefix='Input/'):
+            dest_key = ob.key 
+            split_key = dest_key.split('/')
+            file_name = split_key[-1]
+            copy_source = {
+                'Bucket':'bahu-s3',
+                'Key':ob.key 
+            }
+            s3_client.copy_object(CopySource=copy_source, Key='Output/'+file_name, Bucket='bhagya-s3')
+
+def lambda_handler(event, context):
+    if 'iter_count' not in event.keys():
+        event['iter_count'] = 1 
+        return processing(event)
+    else:
+        event['iter_count'] = event['iter_count'] + 1
+        return processing(event)
+    return event  
